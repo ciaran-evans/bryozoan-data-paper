@@ -113,6 +113,8 @@ bugula_early_mass <- bryozoan %>%
 
 bryozoan$Mass[bryozoan$Mass < 1] <- bugula_early_mass
 
+write_csv(bryozoan, file="bryozoan_data_fixed.csv")
+
 
 # relationship between mass and metabolic rate
 pdf(file = "bryozoan_eda_2.pdf", width=9, height=4)

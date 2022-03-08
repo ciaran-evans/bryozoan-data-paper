@@ -1,0 +1,114 @@
+---
+title: "Reading a Research Paper"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Instructions:** Statistics is an important research tool used in many fields. In this activity, you will read a biology research article that applies statistics to study the relationship between an organism's size and energy consumption. In later activities, you will work with the original data from this article to reproduce the article's main findings. The questions below will teach you how to read a research paper and summarize its results.
+
+# Overview
+
+## The research question
+
+From an evolutionary perspective, an individual organism’s success is judged by its ability to reproduce, and the most successful organisms are those which make the biggest contribution to their species’ gene pool. In many species, one factor associated with reproductive success is size, but there are competing explanations for this association. In the paper ["Why does offspring size affect performance? Integrating metabolic scaling with life-history theory"](https://royalsocietypublishing.org/doi/10.1098/rspb.2015.1946) (Pettersen et al. 2015, *Proc. R. Soc. B.*), the authors study the relationship between size and energy consumption in two species of marine bryozoan, *Bugula neritina* and *Watersipora subtorquata*.
+
+In this activity, you will read and summarize the paper by Pettersen *et al.* 
+
+## Outline of a research paper
+
+Research papers in many fields, particularly the sciences, often contain the following sections:
+
+* *Introduction:* A broad overview of the research question the authors want to study, motivation for studying this question, and the authors' approach to answering their question. The introduction often starts very general, then narrows to the specific question addressed in this paper.
+* *Methods:* The data and analysis techniques used to answer the research question. This typically describes the what the data looks like, how and where it was collected, and any statistical tools (e.g. visualizations, regression, hypothesis testing) that were used when analyzing the data.
+* *Results:* A summary of the analysis results, such as figures showing regression fits, and tables of regression coefficients and p-values.
+* *Discussion:* A discussion of the analysis results, in context of the original research question. In this section, explanations for *why* particular results were observed may be proposed.
+* *Conclusion:* A short summary of the paper and its key results, and their connections to broader scientific questions. The conclusion is often the reverse of the introduction: it starts with the specific question addressed by this paper, then discusses the implications of this research for science in general.
+
+## Reading a research paper
+
+Reading a research paper, particularly in a field in which you are not an expert, can be challenging. The trick is to skim the paper for the most relevant information, and skip over technical details that are not essential to understanding the key take-aways. The questions below will guide you to the most important sections in the paper by Pettersen *et al.*
+
+# Questions
+
+## The Introduction
+
+The best place to start is often with the Introduction. This section will explain what the researchers are trying to study, and usually doesn't contain too many technical details.
+
+Read paragraphs 1 and 3 of the Introduction, then answer the following questions.
+
+:::{.question}
+#### Question 1
+
+Why do the authors want to study the relationship between size and biological performance? (Paragraph 1, Introduction)
+:::
+
+:::{.question}
+#### Question 2
+
+What relationship between size and biological performance has been observed in previous literature? (Paragraph 1, Introduction)
+:::
+
+:::{.question}
+#### Question 3
+
+The authors hypothesize that "metabolic scaling" is an explanation for the observed relationship in Question 2. What does "metabolic scaling" mean? (Paragraph 3, Introduction)
+:::
+
+The authors summarize their paper in the following sentence, near the end of the Introduction: 
+
+"Here, we determine the static metabolic scaling exponents across natural variation in offspring size for two marine invertebrates, *Bugula neritina* and *Watersipora subtorquata*, repeating this at multiple stages of development until individuals reach the stage of independence (where offspring commence feeding and no longer rely on maternally supplied energy provisioning)."
+
+Our goal for the rest of the paper is to understand how the authors conducted this analysis. We want to answer the following questions:
+
+* What data did the authors use to determine metabolic scaling exponents?
+* What statistical methods did the authors use to analyze their data?
+* What were the results of their statistical analysis?
+
+Other information is available in the paper, such as specific details on how their experiments were conducted. This information is valuable, but is not as relevant to the statistical analysis.
+
+## The Data
+
+The data collection process is described in the *Materials and methods* section of the research paper. Read paragraphs 1 and 2 of Section 2(b), and look at Table 1. Then answer the following questions.
+
+:::{.question}
+#### Question 4
+
+Where were the data collected? (Paragraph 2, Section 2(b))
+:::
+
+:::{.question}
+#### Question 5
+
+What are the three developmental stages studied? (Paragraph 1, Section 2(b), and Table 1)
+:::
+
+## Statistical Methods
+
+The authors measure each bryozoan's size by its *mass* (in micrograms, $\mu$g), and its rate of energy consumption by its *metabolic rate* (in millijoules per hour, mJ/hr). They then use statistics to model the relationship between mass and metabolic rate.
+
+A summary of statistical methods is also available in the *Materials and methods*. Read paragraph 2 of Section 2(c), and the caption for Table 1.
+
+:::{.question}
+#### Question 6
+
+What model and transformations did the authors use for the relationship between mass and metabolic rate? (Paragraph 2, Section 2(c), and the caption for Table 1)
+:::
+
+## Conclusions
+
+Finally, let's see what the researchers concluded from their statistical models. Full details are provided in the *Results* and *Discussion* sections, but it is usually easier to determine the big-picture results by reading the *Conclusion* section first.
+
+Read the Conclusion.
+
+:::{.question}
+#### Question 7
+
+What did the researchers conclude about the relationship between mass and metabolic rate from their statistical analysis?
+:::
+
+# Next steps
+
+Now that we have an overview of the research paper, we can start to reproduce their analysis. The authors made their raw data available on the Dryad repository, so we can fit the same regression models and carry out the same hypothesis tests. As we begin to work with the data, we can go back to the Results and Discussion sections to get more details on their analysis.

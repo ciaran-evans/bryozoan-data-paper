@@ -1,10 +1,23 @@
+# Installing packages
+# uncomment if these are not installed
+# install.packages("tidyverse")
+# install.packages("lme4")
+# install.packages("lmerTest")
+# install.packages("RLRsim")
+# install.packages("latex2exp")
+# install.packages("patchwork")
+# install.packages("xtable")
+
 library(tidyverse)
 library(lme4)
 library(lmerTest)
 library(RLRsim)
 library(latex2exp)
+library(patchwork)
+library(xtable)
 
 # importing and organizing the raw data
+# Here we do initial data tidying
 
 metab <- read_csv("bryozoan_raw.csv")
 metab_b <- metab[,1:4]
@@ -22,24 +35,35 @@ bryozoan <- metab_b %>%
   mutate(Mass = 10^Mass,
          Metabolic = 10^Metabolic,
          Stage = tolower(Stage)) %>%
-  select(Species, Run, Stage, Mass, Metabolic) %>%
+  dplyr::select(Species, Run, Stage, Mass, Metabolic) %>%
   arrange(Species, Run, Stage) %>%
   mutate(Run = cumsum(c(1, diff(Run) != 0)))
 
-write_csv(bryozoan, file="bryozoan_data.csv")
+### uncomment to save the data
+# write_csv(bryozoan, file="bryozoan_data.csv")
 
 
-# Number of rows in the data
+# Section 3
+
+### Number of runs
+bryozoan %>%
+  pull(Run) %>%
+  unique() %>%
+  length()
+
+### Number of rows in the data
 nrow(bryozoan)
 
-# Number of individuals
+# Section 4.1
+
+### Number of individuals
 bryozoan %>%
   filter(Stage != "late") %>%
   nrow()
 
-# check the same number of individuals is 
-# measured in early and late stage for each run
-# (result is empty, so the numbers are always the same)
+### check the same number of individuals is 
+### measured in early and late stage for each run
+### (result is empty, so the numbers are always the same)
 bryozoan %>%
   filter(Stage != "larvae") %>%
   group_by(Species, Run) %>%
@@ -48,10 +72,14 @@ bryozoan %>%
   ungroup() %>%
   filter(num_early != num_late)
 
-# check whether mass and metabolic rate were measured once
-# or twice
-# For the Watersipora: there are no NAs after the full join,
-# so each mass is measured once
+
+# Section 4.2
+
+## check whether mass and metabolic rate were measured once
+## or twice
+
+### For the Watersipora: there are no NAs after the full join,
+### so each mass is measured once
 bryozoan %>%
   filter(Species == "watersipora",
          Stage == "early") %>%
@@ -62,8 +90,8 @@ bryozoan %>%
   is.na() %>%
   sum()
 
-# For the bugula:
-# Lots of NAs
+### For the bugula:
+### Lots of NAs
 bryozoan %>%
   filter(Species == "bugula",
          Stage == "early") %>%
@@ -74,16 +102,16 @@ bryozoan %>%
   is.na() %>%
   sum()
 
-# NAs are 4*number of early bugula. So what we 
-# would expect if each mass was measured twice
+### NAs are 4*number of early bugula. So what we 
+### would expect if each mass was measured twice
 bryozoan %>%
   filter(Species == "bugula",
          Stage == "early") %>%
   nrow()
 
-
-# distributions of mass and metabolic rate
-# (before fixing the error)
+## Figure 1
+### distributions of mass and metabolic rate
+### (before fixing the error)
 p1 <- bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
   ggplot(aes(x = Species, y = Mass, color = Stage)) +
@@ -98,14 +126,13 @@ p2 <- bryozoan %>%
   theme_bw() +
   labs(y = "Metabolic rate (mJ/hour)")
 
-library(patchwork)
-
-pdf(file = "bryozoan_eda_1.pdf", width=10, height=4)
+### Uncomment to save the plot
+# pdf(file = "bryozoan_eda_1.pdf", width=10, height=4)
 p1 + p2
-dev.off()
+# dev.off()
 
 
-# fixing errors
+## fixing errors
 bugula_early_mass <- bryozoan %>%
   filter(Species == "bugula",
          Stage == "early") %>%
@@ -113,11 +140,18 @@ bugula_early_mass <- bryozoan %>%
 
 bryozoan$Mass[bryozoan$Mass < 1] <- bugula_early_mass
 
-write_csv(bryozoan, file="bryozoan_data_fixed.csv")
+## Uncomment to save the corrected data
+# write_csv(bryozoan, file="bryozoan_data_fixed.csv")
 
 
-# relationship between mass and metabolic rate
-pdf(file = "bryozoan_eda_2.pdf", width=9, height=4)
+
+# Section 4.3
+
+## Figure 2
+### relationship between mass and metabolic rate
+
+### Uncomment to save the plot
+# pdf(file = "bryozoan_eda_2.pdf", width=9, height=4)
 bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
   ggplot(aes(x = Mass, y = Metabolic, color = Stage)) +
@@ -127,11 +161,15 @@ bryozoan %>%
   theme_bw() +
   labs(x = "Mass (micrograms)",
        y = "Metabolic rate (mJ/hour)")
-dev.off()
+# dev.off()
 
 
-# differences by run
-pdf(file = "bryozoan_eda_3.pdf", width=10, height=3)
+
+## Figure 3
+### differences by run
+
+### Uncomment to save the plot
+# pdf(file = "bryozoan_eda_3.pdf", width=10, height=3)
 bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
   ggplot(aes(x = as.factor(Run), y = Metabolic, 
@@ -140,15 +178,27 @@ bryozoan %>%
   facet_wrap(~Stage) +
   theme_bw() +
   labs(x = "Run", y = "Metabolic rate (mJ/hour)")
-dev.off()
+# dev.off()
 
-# filtering
+
+# Section 5.1
+
+## subsetting the data to focus only on early-stage bugula
 
 bugula_early <- bryozoan %>%
   filter(Species == "bugula",
          Stage == "early")
 
+
+# Section 5.2
+
+## Fitting a simple linear regression with early-stage bugula
+## (untransformed data)
+
 be_lm <- lm(Metabolic ~ Mass, data = bugula_early)
+
+## Figure 4
+### Diagnostic plots for be_lm
 
 p1 <- bugula_early %>%
   mutate(residuals = residuals(be_lm),
@@ -170,22 +220,30 @@ p2 <- bugula_early %>%
        y = "Observed residual quantiles") +
   theme_bw()
 
-pdf(file = "bryozoan_diagnostics_1.pdf", width=9, height=4)
+### uncomment to save the plot
+# pdf(file = "bryozoan_diagnostics_1.pdf", width=9, height=4)
 p1 + p2
-dev.off()
+# dev.off()
 
-
+### summary of fitted model
 summary(be_lm)
 
-# confidence interval for the slope
+### p-value for hypothesis test
+### H0: beta1 = 0   HA: beta1 > 0
+pt(4.946, df = 195, lower.tail=F)
+
+### 95% confidence interval for the slope
 
 0.006427 - qt(0.025, 195, lower.tail=F)*0.0013
 0.006427 + qt(0.025, 195, lower.tail=F)*0.0013
 
 
-# log transformations
 
-# motivation
+
+# Section 6: log transformations
+
+## Figure 5
+### motivation for log-transforming both predictor and response
 p1 <- data.frame(x = 1:100, y = 1:100) %>%
   ggplot(aes(x = x, y = y)) +
   geom_line() +
@@ -222,14 +280,15 @@ p3 <- data.frame(x = 1:100, y = (1:100)^0.25) %>%
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 
-pdf(file="transformation_motivation.pdf", width = 12, height=4)
+### uncomment to save the plot
+# pdf(file="transformation_motivation.pdf", width = 12, height=4)
 p1 + p2 + p3
-dev.off()
+# dev.off()
 
 
+## fitting transformed model
 
-# fitting transformed model
-
+### creating log-transformed variables
 bugula_early <- bugula_early %>%
   mutate(log_mass = log(Mass),
          log_metabolic = log(Metabolic))
@@ -240,27 +299,34 @@ be_lm <- lm(log_metabolic ~ log_mass,
 
 summary(be_lm)
 
-# confidence interval
+## confidence interval for log-log slope
 
 0.5991 - qt(0.025, 195, lower.tail=F)*0.1162
 0.5991 + qt(0.025, 195, lower.tail=F)*0.1162
 
-# p-value
+## p-value
+### H0: beta = 1   HA: beta < 1
 (0.5991 - 1)/0.1162
 pt(-3.45, 195)
 
 
 
-# Multiple regression
+# Section 7: Multiple regression
 
+## Creating log-transformed variables for the full data
 bryozoan <- bryozoan %>%
   mutate(log_mass = log(Mass),
          log_metabolic = log(Metabolic))
 
+## excluding late-stage measurements to avoid dependence issues
 bryozoan_larvae_early <- bryozoan %>%
   filter(Stage != "late")
 
-pdf(file = "bryozoan_eda_4.pdf", width=9, height=4)
+## Figure 6
+### log metabolic rate vs. log mass for larval and early stages
+
+### Uncomment to save plot
+# pdf(file = "bryozoan_eda_4.pdf", width=9, height=4)
 bryozoan_larvae_early %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early")) %>%
   ggplot(aes(x = log_mass, 
@@ -272,15 +338,22 @@ bryozoan_larvae_early %>%
   theme_bw() +
   labs(x = "log(Mass)",
        y = "log(Metabolic rate)")
-dev.off()
+# dev.off()
 
+## Re-level the Stage variable so larval is baseline
+## This is a little more intuitive, since larval comes
+## chronologically before early stage
 bryozoan_larvae_early <- bryozoan_larvae_early %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early"))
 
-
+## Fitting model in Equation (5)
 ble_lm <- lm(log_metabolic ~ Stage*Species + log_mass, 
              data = bryozoan_larvae_early)
 
+summary(ble_lm)
+
+## Check that residual plot for the multiple regression model looks reasonable
+## (not shown in paper)
 bryozoan_larvae_early %>%
   mutate(pred = predict(ble_lm),
          resid = residuals(ble_lm)) %>%
@@ -293,20 +366,20 @@ bryozoan_larvae_early %>%
        y = "Residuals") +
   theme_bw()
 
-summary(ble_lm)
 
-
-# confidence interval
+## confidence interval
 
 0.577 - qt(0.025, 563, lower.tail=F)*0.073
 0.577 + qt(0.025, 563, lower.tail=F)*0.073
 
-# test
+## test
+### H0: beta = 1   HA: beta < 1
 
 pt((0.577 - 1)/0.073, 563)
 
 
-# does the slope vary? Answer appears to be no
+## does the slope vary? Answer appears to be no. Compare against a
+## full model with all interaction terms
 
 ble_lm_full <- lm(log_metabolic ~ Stage*Species*log_mass, 
                   data = bryozoan_larvae_early)
@@ -315,29 +388,42 @@ anova(ble_lm, ble_lm_full)
 
 
 
-# Mixed effects models
 
-# simple random intercept model
+# Section 8: Mixed effects models
 
+## simple random intercept model (Equation (7)) with REML
 ble_lme_simple <- lmer(log_metabolic ~ (1|Run), 
                        data = bryozoan_larvae_early)
 
+## Do we need to include Run in the model? This is a comparison
+## between the random intercepts model, and an intercept-only linear model
+
+### intercept-only linear model
 ble_lm_null <- lm(log_metabolic ~ 1, 
                        data = bryozoan_larvae_early)
 
-exactRLRT(ble_lme_simple)
-
+### Using likelihood ratio test with the anova function
+### Possible issue: conservative because variance = 0 is on the edge
+### of the parameter space
 anova(ble_lme_simple, ble_lm_null)
 
-# more complicated model
+### Using a simulation-based LRT from RLRsim
+exactRLRT(ble_lme_simple)
+
+
+
+## Incorporating Species, Stage, and mass (Equation (8))
 
 ble_lme <- lmer(log_metabolic ~ (1|Run) + Stage*Species + 
                   log_mass, data = bryozoan_larvae_early)
 
+summary(ble_lme)
+
+### Testing whether the random effect variance is 0
 exactRLRT(ble_lme)
 
-
-# checking assumptions
+### Figure 7
+### checking assumptions for the model in Equation (8)
 
 p1 <- bryozoan_larvae_early %>%
   mutate(pred = predict(ble_lme),
@@ -368,18 +454,17 @@ p3 <- data.frame(sample = coef(ble_lme)$Run[,1]) %>%
        y = "Estimated random effect quantiles") +
   theme_bw()
 
-pdf(file="mixed_model_diagnostics.pdf", width=12, height=3)
+### Uncomment to save the plot
+# pdf(file="mixed_model_diagnostics.pdf", width=12, height=3)
 p1 + p2 + p3
-dev.off()
+# dev.off()
 
-summary(ble_lme)
-
-# t confidence interval
+### t confidence interval
 0.67612 - qt(0.025, df=560.37, lower.tail = F)*0.07411
 0.67612 + qt(0.025, df=560.37, lower.tail = F)*0.07411
 
 
-# parametric bootstrap CI
+### parametric bootstrap CI (simple percentile interval)
 boot_fun <- function(fitted_mod){
   return(coef(fitted_mod)$Run$log_mass[1])
 }
@@ -387,13 +472,17 @@ boot_fun <- function(fitted_mod){
 param_boot <- bootMer(ble_lme, boot_fun, nsim = 10000,
                       seed = 3, type = "parametric")
 
-# (simple percentile interval)
 quantile(param_boot$t, 0.025)
 quantile(param_boot$t, 0.975)
 
+
+### Hypothesis testing
+### H0: beta = 1   HA: beta < 1
 (0.67612 - 1)/0.07411
 
-# adding random slopes
+
+
+## adding random slopes (Equation (9))
 
 ble_lme_2 <- lmer(log_metabolic ~ Stage*Species + 
                   log_mass + (log_mass|Run), 
@@ -401,6 +490,12 @@ ble_lme_2 <- lmer(log_metabolic ~ Stage*Species +
 
 summary(ble_lme_2)
 
+### Making a nice table of coefficients (for Table 1)
+summary(ble_lme_2)$coefficients[,c(1,2,4)] %>%
+  xtable()
+
+### Parametric bootstrap confidence interval for the slope
+### (simple percentile interval)
 boot_fun <- function(fitted_mod){
   return(mean(coef(fitted_mod)$Run$log_mass))
 }
@@ -408,17 +503,17 @@ boot_fun <- function(fitted_mod){
 param_boot <- bootMer(ble_lme_2, boot_fun, nsim = 10000,
                       seed = 3, type = "parametric")
 
-# (simple percentile interval)
 quantile(param_boot$t, 0.025)
 quantile(param_boot$t, 0.975)
 
 
-# Now what if we wanted to include the late-stage 
-# bugula in our model too? 
-# One way to do that could be to include a random effect 
-# term for each individual
+# Not included in paper: incorporating late-stage bugula
+## Now what if we wanted to include the late-stage 
+## bugula in our model too? 
+## One way to do that could be to include a random effect 
+## term for each individual
 
-# first we need to make a term for the individual id
+## first we need to make a term for the individual id
 
 bryozoan_id <- bryozoan %>%
   filter(Stage != "larvae") %>%

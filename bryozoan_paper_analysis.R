@@ -114,15 +114,17 @@ bryozoan %>%
 ### (before fixing the error)
 p1 <- bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
-  ggplot(aes(x = Species, y = Mass, color = Stage)) +
+  ggplot(aes(x = Stage, y = Mass)) +
   geom_boxplot(lwd=0.7) +
+  facet_wrap(~Species) +
   theme_bw() +
   labs(y = "Mass (micrograms)")
 
 p2 <- bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
-  ggplot(aes(x = Species, y = Metabolic, color = Stage)) +
+  ggplot(aes(x = Stage, y = Metabolic)) +
   geom_boxplot(lwd=0.7) +
+  facet_wrap(~Species) +
   theme_bw() +
   labs(y = "Metabolic rate (mJ/hour)")
 
@@ -154,13 +156,15 @@ bryozoan$Mass[bryozoan$Mass < 1] <- bugula_early_mass
 # pdf(file = "bryozoan_eda_2.pdf", width=9, height=4)
 bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
-  ggplot(aes(x = Mass, y = Metabolic, color = Stage)) +
-  geom_point() +
+  ggplot(aes(x = Mass, y = Metabolic, color = Stage, 
+             shape = Stage)) +
+  geom_point(alpha = 0.8, size=1.5) +
   geom_smooth(se=F, method="lm") +
   facet_wrap(~Species) +
   theme_bw() +
   labs(x = "Mass (micrograms)",
-       y = "Metabolic rate (mJ/hour)")
+       y = "Metabolic rate (mJ/hour)") +
+  guides(color = guide_legend(override.aes = list(linetype = 0)))
 # dev.off()
 
 
@@ -169,13 +173,12 @@ bryozoan %>%
 ### differences by run
 
 ### Uncomment to save the plot
-# pdf(file = "bryozoan_eda_3.pdf", width=10, height=3)
+# pdf(file = "bryozoan_eda_3.pdf", width=10, height=4)
 bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
-  ggplot(aes(x = as.factor(Run), y = Metabolic, 
-             color = Species)) +
+  ggplot(aes(x = as.factor(Run), y = Metabolic)) +
   geom_boxplot() +
-  facet_wrap(~Stage) +
+  facet_grid(Species~Stage) +
   theme_bw() +
   labs(x = "Run", y = "Metabolic rate (mJ/hour)")
 # dev.off()
@@ -331,13 +334,15 @@ bryozoan_larvae_early %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early")) %>%
   ggplot(aes(x = log_mass, 
              y = log_metabolic,
-             color = Stage)) +
-  geom_point() +
+             color = Stage,
+             shape = Stage)) +
+  geom_point(alpha = 0.8, size=1.5) +
   geom_smooth(se=F, method="lm") +
   facet_wrap(~Species) +
   theme_bw() +
   labs(x = "log(Mass)",
-       y = "log(Metabolic rate)")
+       y = "log(Metabolic rate)") +
+  guides(color = guide_legend(override.aes = list(linetype = 0)))
 # dev.off()
 
 ## Re-level the Stage variable so larval is baseline
@@ -429,8 +434,8 @@ p1 <- bryozoan_larvae_early %>%
   mutate(pred = predict(ble_lme),
          resid = residuals(ble_lme)) %>%
   ggplot(aes(x = pred, y = resid,
-             color = Species)) +
-  geom_point() +
+             color = Species, shape = Species)) +
+  geom_point(alpha = 0.8, size = 1.5) +
   geom_abline(slope = 0, intercept = 0,
               color = "blue", lwd = 1.2) +
   labs(x = "Predicted log(metabolic rate)",
@@ -545,10 +550,12 @@ bryozoan %>%
   mutate(Stage = fct_relevel(Stage, "larvae", "early", "late")) %>%
   ggplot(aes(x = log_mass, 
              y = log_metabolic,
-             color = Stage)) +
+             color = Stage,
+             shape = Stage)) +
   geom_point() +
   geom_smooth(se=F, method="lm") +
   facet_wrap(~Species) +
   theme_bw() +
   labs(x = "log(Mass)",
-       y = "log(Metabolic rate)")
+       y = "log(Metabolic rate)",
+       color = "Stage", shape = "Stage")
